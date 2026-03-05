@@ -281,21 +281,14 @@ body{background:var(--bg);color:var(--text);font-family:'Geist',-apple-system,sa
   <div class="auth-card">
     <div>
       <div class="auth-title">Get started</div>
-      <div class="auth-sub">Choose a plan, then sign in</div>
+      <div class="auth-sub">Войди и начни — план можно изменить позже</div>
     </div>
-    <div class="plans-pick" id="plan-picker">
-      <div class="plan-opt sel" data-plan="free" onclick="pickPlan('free',this)">
-        <div class="plan-opt-row"><span class="plan-opt-name">Free</span><span class="pbadge pb-free">FREE</span></div>
-        <div class="plan-opt-desc">10 запросов / 5 часов — базовая модель</div>
+    <div style="background:var(--bg2);border:1px solid var(--line2);border-radius:9px;padding:14px 16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;font-weight:600;color:var(--w)">Начнёшь с Free</span>
+        <span class="pbadge pb-free">FREE</span>
       </div>
-      <div class="plan-opt" data-plan="pro" onclick="pickPlan('pro',this)">
-        <div class="plan-opt-row"><span class="plan-opt-name">Pro</span><span class="pbadge pb-pro">PRO</span></div>
-        <div class="plan-opt-desc">100 запросов / 5 часов — умнее и быстрее</div>
-      </div>
-      <div class="plan-opt" data-plan="ultra" onclick="pickPlan('ultra',this)">
-        <div class="plan-opt-row"><span class="plan-opt-name">Ultra</span><span class="pbadge pb-ultra">ULTRA</span></div>
-        <div class="plan-opt-desc">1000 запросов / 5 часов — максимальный интеллект</div>
-      </div>
+      <div style="font-size:12px;color:var(--text3)">10 запросов / 5 часов · Апгрейд доступен внутри</div>
     </div>
     <button class="google-btn" id="g-btn" onclick="doGoogleSignIn()">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -362,7 +355,7 @@ body{background:var(--bg);color:var(--text);font-family:'Geist',-apple-system,sa
       <div class="topbar">
         <div style="display:flex;align-items:center;gap:10px">
           <button class="ibt burger" onclick="openSb()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M2 7h10M2 10.5h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
-          <div class="model-lbl"><span class="mdot"></span>crymiss-ultra-v3</div>
+          <div class="model-lbl"><span class="mdot"></span>crymiss · groq turbo</div>
         </div>
         <div class="tbar-r">
           <button class="bsm pri" onclick="newChat()">New chat</button>
@@ -438,7 +431,7 @@ body{background:var(--bg);color:var(--text);font-family:'Geist',-apple-system,sa
               <div class="pfeat"><div class="fdot"></div>10 запросов / 5 часов</div>
               <div class="pfeat"><div class="fdot"></div>Стандартная модель</div>
               <div class="pfeat"><div class="fdot"></div>История чатов</div>
-              <button class="pcbtn" id="pb-free" onclick="setPlanFree()">Current plan</button>
+              <button class="pcbtn cur-btn" id="pb-free">Текущий план</button>
             </div>
             <div class="pcard pro" id="pc-pro">
               <div class="pcbadge pb-pro">PRO</div>
@@ -471,7 +464,7 @@ body{background:var(--bg);color:var(--text);font-family:'Geist',-apple-system,sa
           <div style="background:var(--bg1);border:1px solid var(--line2);border-radius:10px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
             <div>
               <div style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:'Geist Mono',monospace;background:var(--w);color:#000;padding:3px 8px;border-radius:4px;margin-bottom:8px">Ultra plan</div>
-              <div style="font-size:15px;font-weight:600;color:var(--w);margin-bottom:4px">crymiss-ultra-v3</div>
+              <div style="font-size:15px;font-weight:600;color:var(--w);margin-bottom:4px">crymiss · groq turbo</div>
               <div style="font-size:12px;color:var(--text3)">Maximum context — priority routing</div>
             </div>
             <div style="display:flex;gap:24px;text-align:right">
@@ -662,12 +655,6 @@ function showToast(msg) {
 }
 
 // ── AUTH ──────────────────────────────────────────
-function pickPlan(p, el) {
-  G.authPlan = p;
-  document.querySelectorAll('.plan-opt').forEach(e=>e.classList.remove('sel'));
-  el.classList.add('sel');
-}
-
 function doGoogleSignIn() {
   const btn = document.getElementById('g-btn');
   btn.disabled = true;
@@ -695,7 +682,7 @@ function demoLogin() { login('dev_user', 'dev@crymiss.ai', ''); }
 function login(name, email, pic) {
   const initials = name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase()||'U';
   G.user = { name, email, pic, initials };
-  G.plan = G.authPlan;
+  G.plan = 'free'; // всегда начинаем с Free
 
   try {
     const raw = localStorage.getItem('cry2_' + email);
@@ -759,17 +746,24 @@ function updPlanCards() {
     card.classList.remove('cur');
     if (p === G.plan) {
       card.classList.add('cur');
-      btn.textContent = 'Current plan';
+      btn.textContent = p === 'free' ? 'Текущий план' : 'Активен ✓';
       btn.className = 'pcbtn cur-btn';
-    } else if (p !== 'free') {
+      btn.onclick = null;
+    } else if (p === 'free') {
+      // Нельзя даунгрейднуть обратно в free просто так
+      btn.textContent = G.plan === 'free' ? 'Текущий план' : 'Базовый план';
+      btn.className = 'pcbtn cur-btn';
+      btn.onclick = null;
+    } else {
       const stars = p === 'pro' ? '100' : '350';
-      btn.textContent = `Купить за ${stars} ⭐`;
+      btn.textContent = 'Купить за ' + stars + ' ⭐';
       btn.className = 'pcbtn tg-btn';
+      btn.onclick = () => buyWithStars(p);
     }
   });
 }
 
-function setPlanFree() { G.plan='free'; G.reqCount=0; G.windowStart=Date.now(); updProfile(); updQuotaUI(); save(); }
+function setPlanFree() { /* Free is always default - no action needed */ }
 
 // ── TG STARS PAYMENT ──────────────────────────────
 async function buyWithStars(plan) {
