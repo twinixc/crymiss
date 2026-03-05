@@ -23,7 +23,7 @@ crymiss/
 
 | Переменная | Где взять |
 |---|---|
-| `GEMINI_API_KEY` | https://aistudio.google.com |
+| `GROQ_API_KEY` | https://console.groq.com/keys |
 | `GOOGLE_CLIENT_ID` | console.cloud.google.com → OAuth 2.0 |
 | `TELEGRAM_BOT_TOKEN` | @BotFather → /newbot |
 | `APP_URL` | https://твой-домен.vercel.app |
